@@ -17,12 +17,15 @@ const GOAL_TEXTURE = 'goal-texture'
 const PIPELINE = 'Light2D'
 const TILE_SIZE = 32
 const TILE_SIZE_HALF = TILE_SIZE / 2
-const LIGHT_DIAMETER = 160
+const LIGHT_DIAMETER = 140
 const LIGHT_VARIATION_MAX_SIZE = 40
 const PLAYER_SPEED = 128
 const PLAYER_TICK_SPEED = 250 // milliseconds
 const ENEMY_SPEED = 64
 const ENEMY_TICK_SPEED = 500 // milliseconds
+
+const NORMAL_LIGHT_COLOR = 0xf2c13a
+const ORM_MODE_LIGHT_COLOR = 0x6633DD
 
 const directions = {
   LEFT: 'left',
@@ -70,8 +73,11 @@ export default class SimpleLevel extends Phaser.Scene {
     this.player.setOrigin(0, 0)
     this.physics.add.collider(this.player, this.layerWater)
     this.physics.add.collider(this.player, this.layerBush)
-    this.player.light = this.lights.addLight(TILE_SIZE + TILE_SIZE_HALF, TILE_SIZE + (TILE_SIZE + 2), LIGHT_DIAMETER).setColor(0xfb5236).setIntensity(2.0)
-    this.lights.enable().setAmbientColor(0xDDDDDD)
+    this.player.light = this.lights.addLight(
+      TILE_SIZE + TILE_SIZE_HALF,
+      TILE_SIZE + (TILE_SIZE + 2),
+      LIGHT_DIAMETER).setColor(NORMAL_LIGHT_COLOR).setIntensity(1.0)
+    this.lights.enable().setAmbientColor(0x000000)
 
     this.enemies = []
     this.enemies.push(this._createEnemy(10, 1, directions.LEFT, this))
@@ -112,12 +118,14 @@ export default class SimpleLevel extends Phaser.Scene {
       }
       if (presses.oneRingMode !== this.oneRingMode) {
         if (presses.oneRingMode) {
+          this.player.light.setColor(ORM_MODE_LIGHT_COLOR)
           this.goal.resetPipeline()
           for (const enemy of this.enemies) {
             enemy.resetPipeline()
             enemy.postFX.addGlow(0xff60ff, 6, 0, false, 0.1, 32)
           }
         } else {
+          this.player.light.setColor(NORMAL_LIGHT_COLOR)
           this.goal.setPipeline(PIPELINE)
           for (const enemy of this.enemies) {
             enemy.setPipeline(PIPELINE)
@@ -199,6 +207,7 @@ export default class SimpleLevel extends Phaser.Scene {
         enemy.body.x = nearestX
         enemy.body.y = nearestY
         enemy.lastMoveTime = time
+
         if (this.oneRingMode) {
         // get enemy location
         // get player location
@@ -216,7 +225,9 @@ export default class SimpleLevel extends Phaser.Scene {
             axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
           }
 
-          // if it's not blocked, move that way
+          // The filter is to remove any commands with a value of 0;
+          // without that line, you can get a silent(!) DBZ exception,
+          // which makes the enemy disappear
           for (const [axis, value, direction] of axisPriority.filter((x) => x[1])) {
             const reduceValue = value / Math.abs(value)
             const worldX = axis === 'x' ? enemy.body.x + (reduceValue * TILE_SIZE) : enemy.body.x

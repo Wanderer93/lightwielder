@@ -27,6 +27,11 @@ const ENEMY_TICK_SPEED = 500 // milliseconds
 const NORMAL_LIGHT_COLOR = 0xf2c13a
 const ORM_MODE_LIGHT_COLOR = 0x6633DD
 
+// If you want to debug enemy placement/map design,
+// set this to 0xBBBBBB, so there is at least some
+// ambient light.
+const AMBIENT_COLOR = 0x000000
+
 const directions = {
   LEFT: 'left',
   RIGHT: 'right',
@@ -77,12 +82,16 @@ export default class SimpleLevel extends Phaser.Scene {
       TILE_SIZE + TILE_SIZE_HALF,
       TILE_SIZE + (TILE_SIZE + 2),
       LIGHT_DIAMETER).setColor(NORMAL_LIGHT_COLOR).setIntensity(1.0)
-    this.lights.enable().setAmbientColor(0x000000)
+    this.lights.enable().setAmbientColor(AMBIENT_COLOR)
 
     this.enemies = []
     this.enemies.push(this._createEnemy(10, 1, directions.LEFT, this))
     this.enemies.push(this._createEnemy(6, 10, directions.DOWN, this))
     this.enemies.push(this._createEnemy(5, 14, directions.DOWN, this))
+    this.enemies.push(this._createEnemy(3, 14, directions.RIGHT, this))
+    this.enemies.push(this._createEnemy(13, 6, directions.LEFT, this))
+    this.enemies.push(this._createEnemy(13, 10, directions.RIGHT, this))
+    this.enemies.push(this._createEnemy(16, 17, directions.UP, this))
 
     this.goal = this.physics.add.image(TILE_SIZE * 17, TILE_SIZE * 7, GOAL_TEXTURE).setPipeline('Light2D')
     this.goal.setOrigin(0, 0)

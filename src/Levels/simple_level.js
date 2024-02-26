@@ -71,7 +71,7 @@ export default class SimpleLevel extends Phaser.Scene {
     this.physics.add.collider(this.player, this.layerWater)
     this.physics.add.collider(this.player, this.layerBush)
     this.player.light = this.lights.addLight(TILE_SIZE + TILE_SIZE_HALF, TILE_SIZE + (TILE_SIZE + 2), LIGHT_DIAMETER).setColor(0xfb5236).setIntensity(2.0)
-    this.lights.enable().setAmbientColor(0x000000)
+    this.lights.enable().setAmbientColor(0xDDDDDD)
 
     this.enemies = []
     this.enemies.push(this._createEnemy(10, 1, directions.LEFT, this))
@@ -199,40 +199,41 @@ export default class SimpleLevel extends Phaser.Scene {
         enemy.body.x = nearestX
         enemy.body.y = nearestY
         enemy.lastMoveTime = time
-      }
-      if (this.oneRingMode) {
+        if (this.oneRingMode) {
         // get enemy location
         // get player location
         // subtract enemy location from plyar's
-        const xDiff = this.player.body.x - enemy.body.x
-        const yDiff = this.player.body.y - enemy.body.y
-        // which is bigger? (abs)
-        const axisPriority = []
-        if (Math.abs(xDiff) > Math.abs(yDiff)) {
-          axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
-          axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
-        } else {
-          axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
-          axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
-        }
-        // if it's not blocked, move that way
-        for (const [axis, value, direction] of axisPriority) {
-          const reduceValue = value / Math.abs(value)
-          const worldX = axis === 'x' ? enemy.body.x + (reduceValue * TILE_SIZE) : enemy.body.x
-          const worldY = axis === 'y' ? enemy.body.y + (reduceValue * TILE_SIZE) : enemy.body.y
-          const waterTile = this.layerWater.getTileAtWorldXY(worldX, worldY)
-          const bushTile = this.layerBush.getTileAtWorldXY(worldX, worldY)
-          if ((waterTile && waterTile.canCollide) || (bushTile && bushTile.canCollide)) {
-            continue
+          const xDiff = this.player.body.x - enemy.body.x
+          const yDiff = this.player.body.y - enemy.body.y
+          console.log(xDiff, yDiff)
+          // which is bigger? (abs)
+          const axisPriority = []
+          if (Math.abs(xDiff) > Math.abs(yDiff)) {
+            axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
+            axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
           } else {
-            enemy.direction = direction
+            axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
+            axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
+          }
 
-            enemy.body.setVelocityX(axis === 'x' ? reduceValue * speed : 0)
-            enemy.body.setVelocityY(axis === 'y' ? reduceValue * speed : 0)
-            break
+          // if it's not blocked, move that way
+          for (const [axis, value, direction] of axisPriority.filter((x) => x[1])) {
+            const reduceValue = value / Math.abs(value)
+            const worldX = axis === 'x' ? enemy.body.x + (reduceValue * TILE_SIZE) : enemy.body.x
+            const worldY = axis === 'y' ? enemy.body.y + (reduceValue * TILE_SIZE) : enemy.body.y
+            const waterTile = this.layerWater.getTileAtWorldXY(worldX, worldY)
+            const bushTile = this.layerBush.getTileAtWorldXY(worldX, worldY)
+            if ((waterTile && waterTile.canCollide) || (bushTile && bushTile.canCollide)) {
+              continue
+            } else {
+              enemy.direction = direction
+
+              enemy.body.setVelocityX(axis === 'x' ? reduceValue * speed : 0)
+              enemy.body.setVelocityY(axis === 'y' ? reduceValue * speed : 0)
+              break
+            }
           }
         }
-        // else move the other
       }
       if (!moving) {
         switch (enemy.direction) {

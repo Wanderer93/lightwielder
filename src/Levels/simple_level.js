@@ -65,6 +65,8 @@ export default class SimpleLevel extends Phaser.Scene {
     this.layerBush = map.createLayer('bush', tileset, 0, 0).setPipeline(PIPELINE)
 
     for (const layer of [this.layerHill, this.layerBush, this.layerWater, this.layerGround]) {
+      layer.x -= map.tileWidth * 3
+      layer.y -= map.tileHeight * 3
       layer.setScale(3)
     }
 

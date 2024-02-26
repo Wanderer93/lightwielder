@@ -1,12 +1,19 @@
 import Phaser from 'phaser/dist/phaser.min.js'
 import Controls from './controls.js'
 
+import WinImageScreen from 'Assets/textures/won.png'
+
 export default class WinScreen extends Phaser.Scene {
   constructor () {
     super({ key: 'win_screen' })
   }
 
+  preload () {
+    this.load.image('win', WinImageScreen)
+  }
+
   create () {
+    this.add.image(400, 300, 'win')
     this.add.text(20, 20, 'Congratulations, you won!')
     this.add.text(20, 50, 'Press WASD to go to main menu')
 

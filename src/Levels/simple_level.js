@@ -82,7 +82,7 @@ export default class SimpleLevel extends Phaser.Scene {
     this.goal.setOrigin(0, 0)
     this.physics.add.overlap(this.player, this.goal, this._goalOverlap, null, this)
 
-    const keys = this.input.keyboard.addKeys('W,A,S,D')
+    const keys = this.input.keyboard.addKeys('W,A,S,D,J')
     this.controls = new Controls(keys)
     this.lastMoveTime = 0
   }

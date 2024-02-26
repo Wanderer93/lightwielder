@@ -200,60 +200,58 @@ export default class SimpleLevel extends Phaser.Scene {
         enemy.body.y = nearestY
         enemy.lastMoveTime = time
       }
-
-      if (!moving) {
-        if (this.oneRingMode) {
+      if (this.oneRingMode) {
         // get enemy location
         // get player location
         // subtract enemy location from plyar's
-          const xDiff = this.player.body.x - enemy.body.x
-          const yDiff = this.player.body.y - enemy.body.y
-          // which is bigger? (abs)
-          const axisPriority = []
-          if (Math.abs(xDiff) > Math.abs(yDiff)) {
-            axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
-            axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
-          } else {
-            axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
-            axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
-          }
-          // if it's not blocked, move that way
-          for (const [axis, value, direction] of axisPriority) {
-            const reduceValue = value / Math.abs(value)
-            const worldX = axis === 'x' ? enemy.body.x + (reduceValue * TILE_SIZE) : enemy.body.x
-            const worldY = axis === 'y' ? enemy.body.y + (reduceValue * TILE_SIZE) : enemy.body.y
-            const waterTile = this.layerWater.getTileAtWorldXY(worldX, worldY)
-            const bushTile = this.layerBush.getTileAtWorldXY(worldX, worldY)
-            if ((waterTile && waterTile.canCollide) || (bushTile && bushTile.canCollide)) {
-              continue
-            } else {
-              enemy.direction = direction
-
-              enemy.body.setVelocityX(axis === 'x' ? reduceValue * speed : 0)
-              enemy.body.setVelocityY(axis === 'y' ? reduceValue * speed : 0)
-              break
-            }
-          }
-        // else move the other
+        const xDiff = this.player.body.x - enemy.body.x
+        const yDiff = this.player.body.y - enemy.body.y
+        // which is bigger? (abs)
+        const axisPriority = []
+        if (Math.abs(xDiff) > Math.abs(yDiff)) {
+          axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
+          axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
         } else {
-          switch (enemy.direction) {
-            case directions.LEFT:
-              enemy.direction = directions.RIGHT
-              enemy.body.setVelocityX(speed)
-              break
-            case directions.RIGHT:
-              enemy.direction = directions.LEFT
-              enemy.body.setVelocityX(-speed)
-              break
-            case directions.UP:
-              enemy.direction = directions.DOWN
-              enemy.body.setVelocityY(speed)
-              break
-            case directions.DOWN:
-              enemy.direction = directions.UP
-              enemy.body.setVelocityY(-speed)
-              break
+          axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
+          axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
+        }
+        // if it's not blocked, move that way
+        for (const [axis, value, direction] of axisPriority) {
+          const reduceValue = value / Math.abs(value)
+          const worldX = axis === 'x' ? enemy.body.x + (reduceValue * TILE_SIZE) : enemy.body.x
+          const worldY = axis === 'y' ? enemy.body.y + (reduceValue * TILE_SIZE) : enemy.body.y
+          const waterTile = this.layerWater.getTileAtWorldXY(worldX, worldY)
+          const bushTile = this.layerBush.getTileAtWorldXY(worldX, worldY)
+          if ((waterTile && waterTile.canCollide) || (bushTile && bushTile.canCollide)) {
+            continue
+          } else {
+            enemy.direction = direction
+
+            enemy.body.setVelocityX(axis === 'x' ? reduceValue * speed : 0)
+            enemy.body.setVelocityY(axis === 'y' ? reduceValue * speed : 0)
+            break
           }
+        }
+        // else move the other
+      }
+      if (!moving) {
+        switch (enemy.direction) {
+          case directions.LEFT:
+            enemy.direction = directions.RIGHT
+            enemy.body.setVelocityX(speed)
+            break
+          case directions.RIGHT:
+            enemy.direction = directions.LEFT
+            enemy.body.setVelocityX(-speed)
+            break
+          case directions.UP:
+            enemy.direction = directions.DOWN
+            enemy.body.setVelocityY(speed)
+            break
+          case directions.DOWN:
+            enemy.direction = directions.UP
+            enemy.body.setVelocityY(-speed)
+            break
         }
       }
     }

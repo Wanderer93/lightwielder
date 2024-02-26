@@ -9,10 +9,13 @@ import PlayerJSON from 'Assets/textures/flamey-fin.json'
 
 import EnemyImage from 'Assets/textures/monster-normal.png'
 import EnemyJSON from 'Assets/textures/monster-normal.json'
+import EnemyGrumpyImage from 'Assets/textures/monster-grumpy.png'
+import EnemyGrumpyJSON from 'Assets/textures/monster-grumpy.json'
 import GoalImage from 'Assets/textures/goal.png'
 
 const PLAYER_TEXTURE = 'player-texture'
 const ENEMY_TEXTURE = 'enemy-texture'
+const ENEMY_ORM_TEXTURE = 'enemy-orm-texture'
 const GOAL_TEXTURE = 'goal-texture'
 
 const PIPELINE = 'Light2D'
@@ -51,6 +54,7 @@ export default class SimpleLevel extends Phaser.Scene {
 
     this.load.aseprite(PLAYER_TEXTURE, PlayerImage, PlayerJSON)
     this.load.aseprite(ENEMY_TEXTURE, EnemyImage, EnemyJSON)
+    this.load.aseprite(ENEMY_ORM_TEXTURE, EnemyGrumpyImage, EnemyGrumpyJSON)
 
     this.load.image(GOAL_TEXTURE, GoalImage)
   }
@@ -59,6 +63,7 @@ export default class SimpleLevel extends Phaser.Scene {
     const map = this.make.tilemap({ key: 'map', tileWidth: TILE_SIZE, tileHeight: TILE_SIZE })
     const tileset = map.addTilesetImage('floating-tileset', 'tiles')
     this.isPlayerDying = false
+    this.isORMon = false
     this.layerGround = map.createLayer('ground', tileset, 0, 0).setPipeline(PIPELINE)
     this.layerWater = map.createLayer('water', tileset, 0, 0).setPipeline(PIPELINE)
     this.layerHill = map.createLayer('hill', tileset, 0, 0).setPipeline(PIPELINE)
@@ -132,14 +137,18 @@ export default class SimpleLevel extends Phaser.Scene {
       }
       if (presses.oneRingMode !== this.oneRingMode) {
         if (presses.oneRingMode) {
+          this.isORMon = true
           this.player.light.setColor(ORM_MODE_LIGHT_COLOR)
           this.goal.resetPipeline()
           for (const enemy of this.enemies) {
             enemy.resetPipeline()
             enemy.postFX.addGlow(ORM_MODE_LIGHT_COLOR, 6, 0, false, 0.1, 9)
             enemy.light.setVisible(true)
+            enemy.setTexture(ENEMY_ORM_TEXTURE)
+            this.anims.createFromAseprite(ENEMY_ORM_TEXTURE)
           }
         } else {
+          this.isORMon = false
           this.player.light.setColor(NORMAL_LIGHT_COLOR)
           this.goal.setPipeline(PIPELINE)
           for (const enemy of this.enemies) {
@@ -179,6 +188,9 @@ export default class SimpleLevel extends Phaser.Scene {
   _createEnemy (x, y, direction, scene) {
     const enemy = scene.physics.add.sprite(TILE_SIZE * x, TILE_SIZE * y, ENEMY_TEXTURE).setPipeline(PIPELINE)
     enemy.setScale(1.5)
+
+    // const enemyGrumpy = scene.physics.add.sprite(TILE_SIZE * x, TILE_SIZE * y, ENEMY_ORM_TEXTURE).setPipeline(PIPELINE)
+    // enemyGrumpy.setScale(1.5)
 
     this.anims.createFromAseprite(ENEMY_TEXTURE)
 
@@ -229,7 +241,8 @@ export default class SimpleLevel extends Phaser.Scene {
       // clash with a different tile.
       // Why yes, this bit was a complete arse, why do you ask?
       if (moving) {
-        enemy.play('run', true)
+        (this.isORMon ? enemy.play('run-orm', true) : enemy.play('run', true))
+
         const numX = enemy.body.x + TILE_SIZE_HALF
         const nearestX = numX - (numX % TILE_SIZE)
         const numY = enemy.body.y + TILE_SIZE_HALF
@@ -277,7 +290,7 @@ export default class SimpleLevel extends Phaser.Scene {
       }
 
       if (!moving) {
-        enemy.play('run', false)
+        (this.isORMon ? enemy.play('run-orm', false) : enemy.play('run', false))
         switch (enemy.direction) {
           case directions.LEFT:
             enemy.direction = directions.RIGHT

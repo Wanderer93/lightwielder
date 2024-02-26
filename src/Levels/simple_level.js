@@ -85,6 +85,7 @@ export default class SimpleLevel extends Phaser.Scene {
     this.lights.enable().setAmbientColor(AMBIENT_COLOR)
 
     this.enemies = []
+    this.enemies.push(this._createEnemy(1, 3, directions.RIGHT, this))
     this.enemies.push(this._createEnemy(10, 1, directions.LEFT, this))
     this.enemies.push(this._createEnemy(6, 10, directions.DOWN, this))
     this.enemies.push(this._createEnemy(5, 14, directions.DOWN, this))
@@ -187,11 +188,13 @@ export default class SimpleLevel extends Phaser.Scene {
       .setVisible(false)
 
     enemy.lastMoveTime = 0
+    for (const otherEnemy of scene.enemies) {
+      scene.physics.add.collider(enemy, otherEnemy)
+    }
     return enemy
   }
 
   _enemyOverlap (enemy, player) {
-    console.log('overlap!')
     this.isPlayerDying = true
     player.body.setVelocity(0, 0)
     player.body.stop()
@@ -201,7 +204,6 @@ export default class SimpleLevel extends Phaser.Scene {
     const deathAnim = this.player.anims.play({ key: 'dead', repeat: 0 })
     deathAnim.timeScale = 0.01
     deathAnim.once('animationcomplete', () => {
-      console.log('end game!')
       this.scene.start('game_over')
     })
   }
@@ -233,7 +235,6 @@ export default class SimpleLevel extends Phaser.Scene {
         // subtract enemy location from plyar's
           const xDiff = this.player.body.x - enemy.body.x
           const yDiff = this.player.body.y - enemy.body.y
-          console.log(xDiff, yDiff)
           // which is bigger? (abs)
           const axisPriority = []
           if (Math.abs(xDiff) > Math.abs(yDiff)) {

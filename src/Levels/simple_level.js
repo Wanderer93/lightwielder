@@ -110,7 +110,21 @@ export default class SimpleLevel extends Phaser.Scene {
         this.player.play({ key: 'idle', repeat: -1 })
         this.player.body.reset(nearestX, nearestY)
       }
-
+      if (presses.oneRingMode !== this.oneRingMode) {
+        if (presses.oneRingMode) {
+          this.goal.resetPipeline()
+          for (const enemy of this.enemies) {
+            enemy.resetPipeline()
+            enemy.postFX.addGlow(0xff60ff, 6, 0, false, 0.1, 32)
+          }
+        } else {
+          this.goal.setPipeline(PIPELINE)
+          for (const enemy of this.enemies) {
+            enemy.setPipeline(PIPELINE)
+            enemy.postFX.clear()
+          }
+        } this.oneRingMode = presses.oneRingMode
+      }
       if (anyPressed) {
         if (this.isPlayerDying) {
           return

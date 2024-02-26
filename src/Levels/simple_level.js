@@ -23,11 +23,11 @@ const MUSIC = 'music'
 const PIPELINE = 'Light2D'
 const TILE_SIZE = 48
 const TILE_SIZE_HALF = TILE_SIZE / 2
-const LIGHT_DIAMETER = 120
+const LIGHT_DIAMETER = 180
 const LIGHT_VARIATION_MAX_SIZE = 40
-const PLAYER_SPEED = 128
+const PLAYER_SPEED = 192
 const PLAYER_TICK_SPEED = 250 // milliseconds
-const ENEMY_SPEED = 64
+const ENEMY_SPEED = 96
 const ENEMY_TICK_SPEED = 500 // milliseconds
 
 const NORMAL_LIGHT_COLOR = 0xf2c13a
@@ -104,12 +104,11 @@ export default class SimpleLevel extends Phaser.Scene {
     this.enemies = []
     this.enemies.push(this._createEnemy(1, 3, directions.RIGHT, this))
     this.enemies.push(this._createEnemy(10, 1, directions.LEFT, this))
-    this.enemies.push(this._createEnemy(6, 10, directions.DOWN, this))
+    this.enemies.push(this._createEnemy(6, 8, directions.RIGHT, this))
     this.enemies.push(this._createEnemy(5, 14, directions.DOWN, this))
     this.enemies.push(this._createEnemy(3, 14, directions.RIGHT, this))
-    this.enemies.push(this._createEnemy(13, 6, directions.LEFT, this))
+    this.enemies.push(this._createEnemy(13, 8, directions.LEFT, this))
     this.enemies.push(this._createEnemy(13, 10, directions.RIGHT, this))
-    this.enemies.push(this._createEnemy(16, 17, directions.UP, this))
 
     this.goal = this.physics.add.image(TILE_SIZE * 14, TILE_SIZE * 4, GOAL_TEXTURE).setPipeline('Light2D')
     this.goal.setOrigin(0, 0)

@@ -10,7 +10,7 @@ export default class GameOver extends Phaser.Scene {
     this.add.text(20, 20, 'YOU DIED')
     this.add.text(20, 50, 'Press WASD to go to main menu')
 
-    const keys = this.input.keyboard.addKeys('W,A,S,D')
+    const keys = this.input.keyboard.addKeys('W,A,S,D,J')
     this.controls = new Controls(keys)
   }
 

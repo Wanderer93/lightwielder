@@ -18,12 +18,20 @@ const GOAL_TEXTURE = 'goal-texture'
 const PIPELINE = 'Light2D'
 const TILE_SIZE = 32
 const TILE_SIZE_HALF = TILE_SIZE / 2
-const LIGHT_DIAMETER = 160
+const LIGHT_DIAMETER = 120
 const LIGHT_VARIATION_MAX_SIZE = 40
 const PLAYER_SPEED = 128
 const PLAYER_TICK_SPEED = 250 // milliseconds
 const ENEMY_SPEED = 64
 const ENEMY_TICK_SPEED = 500 // milliseconds
+
+const NORMAL_LIGHT_COLOR = 0xf2c13a
+const ORM_MODE_LIGHT_COLOR = 0x6633DD
+
+// If you want to debug enemy placement/map design,
+// set this to 0xBBBBBB, so there is at least some
+// ambient light.
+const AMBIENT_COLOR = 0x000000
 
 const directions = {
   LEFT: 'left',
@@ -71,19 +79,27 @@ export default class SimpleLevel extends Phaser.Scene {
     this.player.setOrigin(0, 0)
     this.physics.add.collider(this.player, this.layerWater)
     this.physics.add.collider(this.player, this.layerBush)
-    this.player.light = this.lights.addLight(TILE_SIZE + TILE_SIZE_HALF, TILE_SIZE + (TILE_SIZE + 2), LIGHT_DIAMETER).setColor(0xfb5236).setIntensity(2.0)
-    this.lights.enable().setAmbientColor(0x000000)
+    this.player.light = this.lights.addLight(
+      TILE_SIZE + TILE_SIZE_HALF,
+      TILE_SIZE + (TILE_SIZE + 2),
+      LIGHT_DIAMETER).setColor(NORMAL_LIGHT_COLOR).setIntensity(1.0)
+    this.lights.enable().setAmbientColor(AMBIENT_COLOR)
 
     this.enemies = []
+    this.enemies.push(this._createEnemy(1, 3, directions.RIGHT, this))
     this.enemies.push(this._createEnemy(10, 1, directions.LEFT, this))
     this.enemies.push(this._createEnemy(6, 10, directions.DOWN, this))
     this.enemies.push(this._createEnemy(5, 14, directions.DOWN, this))
+    this.enemies.push(this._createEnemy(3, 14, directions.RIGHT, this))
+    this.enemies.push(this._createEnemy(13, 6, directions.LEFT, this))
+    this.enemies.push(this._createEnemy(13, 10, directions.RIGHT, this))
+    this.enemies.push(this._createEnemy(16, 17, directions.UP, this))
 
     this.goal = this.physics.add.image(TILE_SIZE * 17, TILE_SIZE * 7, GOAL_TEXTURE).setPipeline('Light2D')
     this.goal.setOrigin(0, 0)
     this.physics.add.overlap(this.player, this.goal, this._goalOverlap, null, this)
 
-    const keys = this.input.keyboard.addKeys('W,A,S,D')
+    const keys = this.input.keyboard.addKeys('W,A,S,D,J')
     this.controls = new Controls(keys)
     this.lastMoveTime = 0
   }
@@ -111,7 +127,25 @@ export default class SimpleLevel extends Phaser.Scene {
         this.player.play({ key: 'idle', repeat: -1 })
         this.player.body.reset(nearestX, nearestY)
       }
-
+      if (presses.oneRingMode !== this.oneRingMode) {
+        if (presses.oneRingMode) {
+          this.player.light.setColor(ORM_MODE_LIGHT_COLOR)
+          this.goal.resetPipeline()
+          for (const enemy of this.enemies) {
+            enemy.resetPipeline()
+            enemy.postFX.addGlow(ORM_MODE_LIGHT_COLOR, 6, 0, false, 0.1, 9)
+            enemy.light.setVisible(true)
+          }
+        } else {
+          this.player.light.setColor(NORMAL_LIGHT_COLOR)
+          this.goal.setPipeline(PIPELINE)
+          for (const enemy of this.enemies) {
+            enemy.setPipeline(PIPELINE)
+            enemy.postFX.clear()
+            enemy.light.setVisible(false)
+          }
+        } this.oneRingMode = presses.oneRingMode
+      }
       if (anyPressed) {
         if (this.isPlayerDying) {
           return
@@ -149,12 +183,22 @@ export default class SimpleLevel extends Phaser.Scene {
     scene.physics.add.collider(enemy, scene.layerWater)
     scene.physics.add.collider(enemy, scene.layerBush)
     scene.physics.add.overlap(enemy, scene.player, scene._enemyOverlap, null, scene)
+    enemy.light = this.lights.addLight(
+      TILE_SIZE * x + TILE_SIZE_HALF,
+      TILE_SIZE * y + TILE_SIZE_HALF,
+      LIGHT_DIAMETER)
+      .setColor(ORM_MODE_LIGHT_COLOR)
+      .setIntensity(1.0)
+      .setVisible(false)
+
     enemy.lastMoveTime = 0
+    for (const otherEnemy of scene.enemies) {
+      scene.physics.add.collider(enemy, otherEnemy)
+    }
     return enemy
   }
 
   _enemyOverlap (enemy, player) {
-    console.log('overlap!')
     this.isPlayerDying = true
     player.body.setVelocity(0, 0)
     player.body.stop()
@@ -164,7 +208,6 @@ export default class SimpleLevel extends Phaser.Scene {
     const deathAnim = this.player.anims.play({ key: 'dead', repeat: 0 })
     deathAnim.timeScale = 0.01
     deathAnim.once('animationcomplete', () => {
-      console.log('end game!')
       this.scene.start('game_over')
     })
   }
@@ -190,29 +233,72 @@ export default class SimpleLevel extends Phaser.Scene {
         enemy.body.x = nearestX
         enemy.body.y = nearestY
         enemy.lastMoveTime = time
+
+        if (this.oneRingMode) {
+        // get enemy location
+        // get player location
+        // subtract enemy location from plyar's
+          const xDiff = this.player.body.x - enemy.body.x
+          const yDiff = this.player.body.y - enemy.body.y
+          // which is bigger? (abs)
+          const axisPriority = []
+          if (Math.abs(xDiff) > Math.abs(yDiff)) {
+            axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
+            axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
+          } else {
+            axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
+            axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
+          }
+
+          // The filter is to remove any commands with a value of 0;
+          // without that line, you can get a silent(!) DBZ exception,
+          // which makes the enemy disappear
+          for (const [axis, value, direction] of axisPriority.filter((x) => x[1])) {
+            const reduceValue = value / Math.abs(value)
+            const worldX = axis === 'x' ? enemy.body.x + (reduceValue * TILE_SIZE) : enemy.body.x
+            const worldY = axis === 'y' ? enemy.body.y + (reduceValue * TILE_SIZE) : enemy.body.y
+            const waterTile = this.layerWater.getTileAtWorldXY(worldX, worldY)
+            const bushTile = this.layerBush.getTileAtWorldXY(worldX, worldY)
+            if ((waterTile && waterTile.canCollide) || (bushTile && bushTile.canCollide)) {
+              continue
+            } else {
+              enemy.direction = direction
+
+              enemy.body.setVelocityX(axis === 'x' ? reduceValue * speed : 0)
+              enemy.body.setVelocityY(axis === 'y' ? reduceValue * speed : 0)
+              break
+            }
+          }
+        }
+      }
+
+      if (!moving) {
+        enemy.play('run', false)
+        switch (enemy.direction) {
+          case directions.LEFT:
+            enemy.direction = directions.RIGHT
+            enemy.body.setVelocityX(speed)
+            break
+          case directions.RIGHT:
+            enemy.direction = directions.LEFT
+            enemy.body.setVelocityX(-speed)
+            break
+          case directions.UP:
+            enemy.direction = directions.DOWN
+            enemy.body.setVelocityY(speed)
+            break
+          case directions.DOWN:
+            enemy.direction = directions.UP
+            enemy.body.setVelocityY(-speed)
+            break
+        }
+
       }
     }
-    if (!moving) {
-      enemy.play('run', false)
-      switch (enemy.direction) {
-        case directions.LEFT:
-          enemy.direction = directions.RIGHT
-          enemy.body.setVelocityX(speed)
-          break
-        case directions.RIGHT:
-          enemy.direction = directions.LEFT
-          enemy.body.setVelocityX(-speed)
-          break
-        case directions.UP:
-          enemy.direction = directions.DOWN
-          enemy.body.setVelocityY(speed)
-          break
-        case directions.DOWN:
-          enemy.direction = directions.UP
-          enemy.body.setVelocityY(-speed)
-          break
-      }
-    }
+
+    enemy.light.x = enemy.body.x + TILE_SIZE_HALF
+    enemy.light.y = enemy.body.y + TILE_SIZE_HALF
+    enemy.light.diameter = LIGHT_DIAMETER + Math.floor(Math.random() * LIGHT_VARIATION_MAX_SIZE)
   }
 
   _goalOverlap (player, goal) {

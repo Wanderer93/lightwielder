@@ -22,12 +22,15 @@ class Controls {
     return this.keys.D.isDown
   }
 
+  isOneRingModePressed () { return this.keys.J.isDown }
+
   areAnyPressed () {
     const snapshot = {
       up: this.isUpPressed(),
       down: this.isDownPressed(),
       left: this.isLeftPressed(),
-      right: this.isRightPressed()
+      right: this.isRightPressed(),
+      oneRingMode: this.isOneRingModePressed()
     }
     return [snapshot.up || snapshot.down || snapshot.left || snapshot.right, snapshot]
   }

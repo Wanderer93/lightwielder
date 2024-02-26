@@ -16,7 +16,7 @@ const ENEMY_TEXTURE = 'enemy-texture'
 const GOAL_TEXTURE = 'goal-texture'
 
 const PIPELINE = 'Light2D'
-const TILE_SIZE = 32
+const TILE_SIZE = 48
 const TILE_SIZE_HALF = TILE_SIZE / 2
 const LIGHT_DIAMETER = 120
 const LIGHT_VARIATION_MAX_SIZE = 40
@@ -31,7 +31,7 @@ const ORM_MODE_LIGHT_COLOR = 0x6633DD
 // If you want to debug enemy placement/map design,
 // set this to 0xBBBBBB, so there is at least some
 // ambient light.
-const AMBIENT_COLOR = 0x000000
+const AMBIENT_COLOR = 0xBBBBBB
 
 const directions = {
   LEFT: 'left',
@@ -65,7 +65,7 @@ export default class SimpleLevel extends Phaser.Scene {
     this.layerBush = map.createLayer('bush', tileset, 0, 0).setPipeline(PIPELINE)
 
     for (const layer of [this.layerHill, this.layerBush, this.layerWater, this.layerGround]) {
-      layer.setScale(2)
+      layer.setScale(3)
     }
 
     this.layerWater.setCollisionByExclusion([-1])
@@ -75,6 +75,7 @@ export default class SimpleLevel extends Phaser.Scene {
 
     this.player = this.physics.add.sprite(TILE_SIZE, TILE_SIZE, PLAYER_TEXTURE).setPipeline(PIPELINE)
     this.player.play({ key: 'idle', repeat: -1 })
+    this.player.setScale(1.5)
 
     this.player.setOrigin(0, 0)
     this.physics.add.collider(this.player, this.layerWater)
@@ -175,6 +176,7 @@ export default class SimpleLevel extends Phaser.Scene {
 
   _createEnemy (x, y, direction, scene) {
     const enemy = scene.physics.add.sprite(TILE_SIZE * x, TILE_SIZE * y, ENEMY_TEXTURE).setPipeline(PIPELINE)
+    enemy.setScale(1.5)
 
     this.anims.createFromAseprite(ENEMY_TEXTURE)
 

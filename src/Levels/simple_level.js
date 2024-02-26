@@ -3,7 +3,7 @@ import Phaser from 'phaser/dist/phaser.min.js'
 import Controls from '../controls.js'
 
 import aTile from 'Assets/textures/tiles.png'
-import Map from 'Assets/textures/test.json'
+import Map from 'Assets/textures/test-small.json'
 import PlayerImage from 'Assets/textures/flamey-fin.png'
 import PlayerJSON from 'Assets/textures/flamey-fin.json'
 

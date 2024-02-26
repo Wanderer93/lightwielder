@@ -7,7 +7,8 @@ import Map from 'Assets/textures/test.json'
 import PlayerImage from 'Assets/textures/flamey-fin.png'
 import PlayerJSON from 'Assets/textures/flamey-fin.json'
 
-import EnemyImage from 'Assets/textures/enemy.png'
+import EnemyImage from 'Assets/textures/monster-normal.png'
+import EnemyJSON from 'Assets/textures/monster-normal.json'
 import GoalImage from 'Assets/textures/goal.png'
 
 const PLAYER_TEXTURE = 'player-texture'
@@ -41,8 +42,8 @@ export default class SimpleLevel extends Phaser.Scene {
     this.load.image('tiles', aTile)
 
     this.load.aseprite(PLAYER_TEXTURE, PlayerImage, PlayerJSON)
+    this.load.aseprite(ENEMY_TEXTURE, EnemyImage, EnemyJSON)
 
-    this.load.image(ENEMY_TEXTURE, EnemyImage)
     this.load.image(GOAL_TEXTURE, GoalImage)
   }
 
@@ -139,7 +140,10 @@ export default class SimpleLevel extends Phaser.Scene {
   }
 
   _createEnemy (x, y, direction, scene) {
-    const enemy = scene.physics.add.image(TILE_SIZE * x, TILE_SIZE * y, ENEMY_TEXTURE).setPipeline(PIPELINE)
+    const enemy = scene.physics.add.sprite(TILE_SIZE * x, TILE_SIZE * y, ENEMY_TEXTURE).setPipeline(PIPELINE)
+
+    this.anims.createFromAseprite(ENEMY_TEXTURE)
+
     enemy.setOrigin(0, 0)
     enemy.direction = direction
     scene.physics.add.collider(enemy, scene.layerWater)
@@ -178,6 +182,7 @@ export default class SimpleLevel extends Phaser.Scene {
       // clash with a different tile.
       // Why yes, this bit was a complete arse, why do you ask?
       if (moving) {
+        enemy.play('run', true)
         const numX = enemy.body.x + TILE_SIZE_HALF
         const nearestX = numX - (numX % TILE_SIZE)
         const numY = enemy.body.y + TILE_SIZE_HALF
@@ -188,6 +193,7 @@ export default class SimpleLevel extends Phaser.Scene {
       }
     }
     if (!moving) {
+      enemy.play('run', false)
       switch (enemy.direction) {
         case directions.LEFT:
           enemy.direction = directions.RIGHT

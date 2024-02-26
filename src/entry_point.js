@@ -4,6 +4,7 @@ import Start from './start.js'
 import Level from './level.js'
 import GameOver from './game_over.js'
 import WinScreen from './win_screen.js'
+import './style.css'
 
 const config = {
   type: Phaser.AUTO,

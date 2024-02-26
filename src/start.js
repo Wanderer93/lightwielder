@@ -6,7 +6,16 @@ export default class Start extends Phaser.Scene {
     super({ key: 'start' })
   }
 
+  preload () {
+    // this.load.add('Celtic Bit', '../assets/fonts/celtic-bit.ttf')
+  }
+
   create () {
+    this.add.text(100, 100, 'Hello, Phaser 3!', {
+      fontFamily: 'Celtic Bit',
+      fontSize: '32px',
+      fill: '#ffffff'
+    })
     this.add.text(20, 20, 'Lightwielder')
     this.add.text(20, 50, 'A game for Indie Dev Jam 3')
     this.add.text(20, 80, 'by @Wanderer93 and @tarkadaal')

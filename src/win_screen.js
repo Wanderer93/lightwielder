@@ -14,8 +14,8 @@ export default class WinScreen extends Phaser.Scene {
 
   create () {
     this.add.image(400, 300, 'win')
-    this.add.text(20, 20, 'Congratulations, you won!')
-    this.add.text(20, 50, 'Press WASD to go to main menu')
+    // this.add.text(20, 20, 'Congratulations, you won!')
+    // this.add.text(20, 50, 'Press WASD to go to main menu')
 
     const keys = this.input.keyboard.addKeys('W,A,S,D,J')
     this.controls = new Controls(keys)

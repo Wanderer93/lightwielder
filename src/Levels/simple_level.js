@@ -12,11 +12,13 @@ import EnemyJSON from 'Assets/textures/monster-normal.json'
 import EnemyGrumpyImage from 'Assets/textures/monster-grumpy.png'
 import EnemyGrumpyJSON from 'Assets/textures/monster-grumpy.json'
 import GoalImage from 'Assets/textures/goal.png'
+import MusicAsset from 'Assets/sounds/music/music.mp3'
 
 const PLAYER_TEXTURE = 'player-texture'
 const ENEMY_TEXTURE = 'enemy-texture'
 const ENEMY_ORM_TEXTURE = 'enemy-orm-texture'
 const GOAL_TEXTURE = 'goal-texture'
+const MUSIC = 'music'
 
 const PIPELINE = 'Light2D'
 const TILE_SIZE = 48
@@ -34,7 +36,7 @@ const ORM_MODE_LIGHT_COLOR = 0x6633DD
 // If you want to debug enemy placement/map design,
 // set this to 0xBBBBBB, so there is at least some
 // ambient light.
-const AMBIENT_COLOR = 0xBBBBBB
+const AMBIENT_COLOR = 0x000000
 
 const directions = {
   LEFT: 'left',
@@ -57,9 +59,15 @@ export default class SimpleLevel extends Phaser.Scene {
     this.load.aseprite(ENEMY_ORM_TEXTURE, EnemyGrumpyImage, EnemyGrumpyJSON)
 
     this.load.image(GOAL_TEXTURE, GoalImage)
+
+    this.load.audio(MUSIC, MusicAsset)
   }
 
   create () {
+    this.backgroundMusic = this.sound.add('music')
+    this.backgroundMusic.loop = true
+    this.backgroundMusic.play()
+
     const map = this.make.tilemap({ key: 'map', tileWidth: TILE_SIZE, tileHeight: TILE_SIZE })
     const tileset = map.addTilesetImage('floating-tileset', 'tiles')
     this.isPlayerDying = false
@@ -103,7 +111,7 @@ export default class SimpleLevel extends Phaser.Scene {
     this.enemies.push(this._createEnemy(13, 10, directions.RIGHT, this))
     this.enemies.push(this._createEnemy(16, 17, directions.UP, this))
 
-    this.goal = this.physics.add.image(TILE_SIZE * 17, TILE_SIZE * 7, GOAL_TEXTURE).setPipeline('Light2D')
+    this.goal = this.physics.add.image(TILE_SIZE * 14, TILE_SIZE * 4, GOAL_TEXTURE).setPipeline('Light2D')
     this.goal.setOrigin(0, 0)
     this.physics.add.overlap(this.player, this.goal, this._goalOverlap, null, this)
 
@@ -224,6 +232,8 @@ export default class SimpleLevel extends Phaser.Scene {
     const deathAnim = this.player.anims.play({ key: 'dead', repeat: 0 })
     deathAnim.timeScale = 0.01
     deathAnim.once('animationcomplete', () => {
+      this.backgroundMusic.stop()
+      this.backgroundMusic.play()
       this.scene.start('game_over')
     })
   }

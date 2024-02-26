@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "config": {
-    "itchiotarget": "tarkadaal/set-phaser-to-stun"
+    "itchiotarget": "errantmoose/lightwielder"
   },
   "standard": {
     "env": [
@@ -18,7 +18,7 @@
     "test": "jest",
     "build": "npm run comply && npm test && npm run fix-libresprite-json && webpack",
     "serve": "http-server ./dist",
-    "itchio-push": "npm run comply && npm test && npm run fix-libresprite-json && webpack --mode=production && zip bundle dist/* && butler push bundle.zip $npm_package_config_itchiotarget:html",
+    "itchio-push": "npm run comply && npm test && npm run fix-libresprite-json && webpack --mode=production && zip bundle dist/* && echo %npm_package_config_itchiotarget% && butler push --verbose bundle.zip %npm_package_config_itchiotarget%:html",
     "fix-libresprite-json": "node scripts/fix-libresprite-json.js",
     "watch": "npm-watch"
   },

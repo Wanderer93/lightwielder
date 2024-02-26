@@ -292,7 +292,6 @@ export default class SimpleLevel extends Phaser.Scene {
             enemy.body.setVelocityY(-speed)
             break
         }
-
       }
     }
 

@@ -200,25 +200,45 @@ export default class SimpleLevel extends Phaser.Scene {
         enemy.body.y = nearestY
         enemy.lastMoveTime = time
       }
-    }
-    if (!moving) {
-      switch (enemy.direction) {
-        case directions.LEFT:
-          enemy.direction = directions.RIGHT
-          enemy.body.setVelocityX(speed)
-          break
-        case directions.RIGHT:
-          enemy.direction = directions.LEFT
-          enemy.body.setVelocityX(-speed)
-          break
-        case directions.UP:
-          enemy.direction = directions.DOWN
-          enemy.body.setVelocityY(speed)
-          break
-        case directions.DOWN:
-          enemy.direction = directions.UP
-          enemy.body.setVelocityY(-speed)
-          break
+
+      if (!moving) {
+        if (this.oneRingMode) {
+        // get enemy location
+        // get player location
+        // subtract enemy location from plyar's
+          const xDiff = this.player.body.x - enemy.body.x
+          const yDiff = this.player.body.y - enemy.body.y
+          // which is bigger? (abs)
+          const axisPriority = []
+          if (Math.abs(xDiff) > Math.abs(yDiff)) {
+            axisPriority.push('x')
+            axisPriority.push('y')
+          } else {
+            axisPriority.push('y')
+            axisPriority.push('x')
+          }
+        // if it's not blocked, move that way
+        // else move the other
+        } else {
+          switch (enemy.direction) {
+            case directions.LEFT:
+              enemy.direction = directions.RIGHT
+              enemy.body.setVelocityX(speed)
+              break
+            case directions.RIGHT:
+              enemy.direction = directions.LEFT
+              enemy.body.setVelocityX(-speed)
+              break
+            case directions.UP:
+              enemy.direction = directions.DOWN
+              enemy.body.setVelocityY(speed)
+              break
+            case directions.DOWN:
+              enemy.direction = directions.UP
+              enemy.body.setVelocityY(-speed)
+              break
+          }
+        }
       }
     }
   }

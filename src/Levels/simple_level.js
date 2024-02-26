@@ -49,6 +49,7 @@ export default class SimpleLevel extends Phaser.Scene {
   create () {
     const map = this.make.tilemap({ key: 'map', tileWidth: TILE_SIZE, tileHeight: TILE_SIZE })
     const tileset = map.addTilesetImage('floating-tileset', 'tiles')
+    this.isPlayerDying = false
     this.layerGround = map.createLayer('ground', tileset, 0, 0).setPipeline(PIPELINE)
     this.layerWater = map.createLayer('water', tileset, 0, 0).setPipeline(PIPELINE)
     this.layerHill = map.createLayer('hill', tileset, 0, 0).setPipeline(PIPELINE)
@@ -106,11 +107,14 @@ export default class SimpleLevel extends Phaser.Scene {
         const numY = this.player.body.y + TILE_SIZE_HALF
         const nearestY = numY - (numY % TILE_SIZE)
         this.player.body.setVelocity(0)
-        // this.player.anims.play('walk', false)
+        this.player.play({ key: 'idle', repeat: -1 })
         this.player.body.reset(nearestX, nearestY)
       }
 
       if (anyPressed) {
+        if (this.isPlayerDying) {
+          return
+        }
         if (presses.down || presses.up || presses.left || presses.right) {
           toggleWalk()
         }
@@ -146,7 +150,19 @@ export default class SimpleLevel extends Phaser.Scene {
   }
 
   _enemyOverlap (enemy, player) {
-    this.scene.start('game_over')
+    console.log('overlap!')
+    this.isPlayerDying = true
+    player.body.setVelocity(0, 0)
+    player.body.stop()
+    player.body.enable = false
+    enemy.body.stop()
+    enemy.body.enable = false
+    const deathAnim = this.player.anims.play({ key: 'dead', repeat: 0 })
+    deathAnim.timeScale = 0.01
+    deathAnim.once('animationcomplete', () => {
+      console.log('end game!')
+      this.scene.start('game_over')
+    })
   }
 
   _updateEnemy (enemy, time) {

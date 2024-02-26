@@ -17,7 +17,7 @@ const GOAL_TEXTURE = 'goal-texture'
 const PIPELINE = 'Light2D'
 const TILE_SIZE = 32
 const TILE_SIZE_HALF = TILE_SIZE / 2
-const LIGHT_DIAMETER = 140
+const LIGHT_DIAMETER = 120
 const LIGHT_VARIATION_MAX_SIZE = 40
 const PLAYER_SPEED = 128
 const PLAYER_TICK_SPEED = 250 // milliseconds
@@ -122,7 +122,8 @@ export default class SimpleLevel extends Phaser.Scene {
           this.goal.resetPipeline()
           for (const enemy of this.enemies) {
             enemy.resetPipeline()
-            enemy.postFX.addGlow(0xff60ff, 6, 0, false, 0.1, 32)
+            enemy.postFX.addGlow(ORM_MODE_LIGHT_COLOR, 6, 0, false, 0.1, 9)
+            enemy.light.setVisible(true)
           }
         } else {
           this.player.light.setColor(NORMAL_LIGHT_COLOR)
@@ -130,6 +131,7 @@ export default class SimpleLevel extends Phaser.Scene {
           for (const enemy of this.enemies) {
             enemy.setPipeline(PIPELINE)
             enemy.postFX.clear()
+            enemy.light.setVisible(false)
           }
         } this.oneRingMode = presses.oneRingMode
       }
@@ -167,6 +169,14 @@ export default class SimpleLevel extends Phaser.Scene {
     scene.physics.add.collider(enemy, scene.layerWater)
     scene.physics.add.collider(enemy, scene.layerBush)
     scene.physics.add.overlap(enemy, scene.player, scene._enemyOverlap, null, scene)
+    enemy.light = this.lights.addLight(
+      TILE_SIZE * x + TILE_SIZE_HALF,
+      TILE_SIZE * y + TILE_SIZE_HALF,
+      LIGHT_DIAMETER)
+      .setColor(ORM_MODE_LIGHT_COLOR)
+      .setIntensity(1.0)
+      .setVisible(false)
+
     enemy.lastMoveTime = 0
     return enemy
   }
@@ -267,6 +277,10 @@ export default class SimpleLevel extends Phaser.Scene {
         }
       }
     }
+
+    enemy.light.x = enemy.body.x + TILE_SIZE_HALF
+    enemy.light.y = enemy.body.y + TILE_SIZE_HALF
+    enemy.light.diameter = LIGHT_DIAMETER + Math.floor(Math.random() * LIGHT_VARIATION_MAX_SIZE)
   }
 
   _goalOverlap (player, goal) {

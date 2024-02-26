@@ -211,13 +211,29 @@ export default class SimpleLevel extends Phaser.Scene {
           // which is bigger? (abs)
           const axisPriority = []
           if (Math.abs(xDiff) > Math.abs(yDiff)) {
-            axisPriority.push('x')
-            axisPriority.push('y')
+            axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
+            axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
           } else {
-            axisPriority.push('y')
-            axisPriority.push('x')
+            axisPriority.push(['y', yDiff, yDiff < 0 ? directions.UP : directions.DOWN])
+            axisPriority.push(['x', xDiff, xDiff < 0 ? directions.LEFT : directions.RIGHT])
           }
-        // if it's not blocked, move that way
+          // if it's not blocked, move that way
+          for (const [axis, value, direction] of axisPriority) {
+            const reduceValue = value / Math.abs(value)
+            const worldX = axis === 'x' ? enemy.body.x + (reduceValue * TILE_SIZE) : enemy.body.x
+            const worldY = axis === 'y' ? enemy.body.y + (reduceValue * TILE_SIZE) : enemy.body.y
+            const waterTile = this.layerWater.getTileAtWorldXY(worldX, worldY)
+            const bushTile = this.layerBush.getTileAtWorldXY(worldX, worldY)
+            if ((waterTile && waterTile.canCollide) || (bushTile && bushTile.canCollide)) {
+              continue
+            } else {
+              enemy.direction = direction
+
+              enemy.body.setVelocityX(axis === 'x' ? reduceValue * speed : 0)
+              enemy.body.setVelocityY(axis === 'y' ? reduceValue * speed : 0)
+              break
+            }
+          }
         // else move the other
         } else {
           switch (enemy.direction) {

@@ -101,6 +101,7 @@ export default class SimpleLevel extends Phaser.Scene {
       LIGHT_DIAMETER).setColor(NORMAL_LIGHT_COLOR).setIntensity(1.0)
     this.lights.enable().setAmbientColor(AMBIENT_COLOR)
 
+    this.anims.createFromAseprite(ENEMY_TEXTURE)
     this.enemies = []
     this.enemies.push(this._createEnemy(1, 3, directions.RIGHT, this))
     this.enemies.push(this._createEnemy(10, 1, directions.LEFT, this))
@@ -198,8 +199,6 @@ export default class SimpleLevel extends Phaser.Scene {
 
     // const enemyGrumpy = scene.physics.add.sprite(TILE_SIZE * x, TILE_SIZE * y, ENEMY_ORM_TEXTURE).setPipeline(PIPELINE)
     // enemyGrumpy.setScale(1.5)
-
-    this.anims.createFromAseprite(ENEMY_TEXTURE)
 
     enemy.setOrigin(0, 0)
     enemy.direction = direction

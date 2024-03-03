@@ -46,6 +46,7 @@ const directions = {
   DOWN: 'down'
 }
 
+const POST_UPDATE = 'postupdate'
 export default class SimpleLevel extends Phaser.Scene {
   constructor () {
     super({ key: 'simple_level' })
@@ -105,6 +106,7 @@ export default class SimpleLevel extends Phaser.Scene {
       LIGHT_DIAMETER).setIntensity(1.0)
     this.domains.lights.setColor(this.player.light, NORMAL_LIGHT_COLOR)
     this.lights.enable().setAmbientColor(AMBIENT_COLOR)
+    this.events.on(POST_UPDATE, () => this.domains.lights.flicker(this.player.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE))
 
     this.anims.createFromAseprite(ENEMY_TEXTURE)
     this.enemies = []
@@ -192,7 +194,6 @@ export default class SimpleLevel extends Phaser.Scene {
     }
     this.player.light.x = this.player.body.x + TILE_SIZE_HALF
     this.player.light.y = this.player.body.y + TILE_SIZE_HALF
-    this.domains.lights.flicker(this.player.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE)
     for (const enemy of this.enemies) {
       this._updateEnemy(enemy, time)
     }
@@ -218,6 +219,7 @@ export default class SimpleLevel extends Phaser.Scene {
       .setVisible(false)
 
     this.domains.lights.setColor(enemy.light, ORM_MODE_LIGHT_COLOR)
+    this.events.on(POST_UPDATE, () => this.domains.lights.flicker(enemy.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE))
 
     enemy.lastMoveTime = 0
     for (const otherEnemy of scene.enemies) {

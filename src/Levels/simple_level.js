@@ -1,5 +1,6 @@
 import Phaser from 'phaser/dist/phaser.min.js'
 
+import Lights from '../lights.js'
 import Controls from '../controls.js'
 
 import aTile from 'Assets/textures/tiles.png'
@@ -48,6 +49,9 @@ const directions = {
 export default class SimpleLevel extends Phaser.Scene {
   constructor () {
     super({ key: 'simple_level' })
+    this.domains = {
+      lights: new Lights(this.lights)
+    }
   }
 
   preload () {
@@ -187,7 +191,7 @@ export default class SimpleLevel extends Phaser.Scene {
     }
     this.player.light.x = this.player.body.x + TILE_SIZE_HALF
     this.player.light.y = this.player.body.y + TILE_SIZE_HALF
-    this.player.light.diameter = LIGHT_DIAMETER + Math.floor(Math.random() * LIGHT_VARIATION_MAX_SIZE)
+    this.domains.lights.flicker(this.player.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE)
     for (const enemy of this.enemies) {
       this._updateEnemy(enemy, time)
     }
@@ -205,7 +209,7 @@ export default class SimpleLevel extends Phaser.Scene {
     scene.physics.add.collider(enemy, scene.layerWater)
     scene.physics.add.collider(enemy, scene.layerBush)
     scene.physics.add.overlap(enemy, scene.player, scene._enemyOverlap, null, scene)
-    enemy.light = this.lights.addLight(
+    enemy.light = scene.lights.addLight(
       TILE_SIZE * x + TILE_SIZE_HALF,
       TILE_SIZE * y + TILE_SIZE_HALF,
       LIGHT_DIAMETER)
@@ -322,7 +326,7 @@ export default class SimpleLevel extends Phaser.Scene {
 
     enemy.light.x = enemy.body.x + TILE_SIZE_HALF
     enemy.light.y = enemy.body.y + TILE_SIZE_HALF
-    enemy.light.diameter = LIGHT_DIAMETER + Math.floor(Math.random() * LIGHT_VARIATION_MAX_SIZE)
+    this.domains.lights.flicker(enemy.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE)
   }
 
   _goalOverlap (player, goal) {

@@ -47,6 +47,9 @@ const directions = {
 }
 
 const POST_UPDATE = 'postupdate'
+const ONE_RING_MODE_ON_EVENT = 'ormmodeon'
+const ONE_RING_MODE_OFF_EVENT = 'ormmodeoff'
+
 export default class SimpleLevel extends Phaser.Scene {
   constructor () {
     super({ key: 'simple_level' })
@@ -107,6 +110,8 @@ export default class SimpleLevel extends Phaser.Scene {
     this.domains.lights.setColor(this.player.light, NORMAL_LIGHT_COLOR)
     this.lights.enable().setAmbientColor(AMBIENT_COLOR)
     this.events.on(POST_UPDATE, () => this.domains.lights.flicker(this.player.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE))
+    this.events.on(ONE_RING_MODE_ON_EVENT, () => this.domains.lights.setColor(this.player.light, ORM_MODE_LIGHT_COLOR))
+    this.events.on(ONE_RING_MODE_OFF_EVENT, () => this.domains.lights.setColor(this.player.light, NORMAL_LIGHT_COLOR))
 
     this.anims.createFromAseprite(ENEMY_TEXTURE)
     this.enemies = []
@@ -153,7 +158,7 @@ export default class SimpleLevel extends Phaser.Scene {
       if (presses.oneRingMode !== this.oneRingMode) {
         if (presses.oneRingMode) {
           this.isORMon = true
-          this.domains.lights.setColor(this.player.light, ORM_MODE_LIGHT_COLOR)
+          this.events.emit(ONE_RING_MODE_ON_EVENT)
           this.goal.resetPipeline()
           for (const enemy of this.enemies) {
             enemy.resetPipeline()
@@ -164,7 +169,7 @@ export default class SimpleLevel extends Phaser.Scene {
           }
         } else {
           this.isORMon = false
-          this.domains.lights.setColor(this.player.light, NORMAL_LIGHT_COLOR)
+          this.events.emit(ONE_RING_MODE_OFF_EVENT)
           this.goal.setPipeline(PIPELINE)
           for (const enemy of this.enemies) {
             enemy.setPipeline(PIPELINE)

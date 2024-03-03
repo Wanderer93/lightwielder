@@ -17,3 +17,14 @@ test('flicker', () => {
   l.flicker(actor, diameter, maxVariation)
   expect(actor.diameter).toEqual(105)
 })
+
+test('setColor', () => {
+  const l = new Lights(_fakeController())
+  const color = 0xBAEBAE
+  const actor = {
+    color: 0,
+    setColor: function (x) { this.color = x }
+  }
+  l.setColor(actor, color)
+  expect(actor.color).toEqual(color)
+})

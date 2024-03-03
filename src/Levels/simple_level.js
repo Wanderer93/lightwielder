@@ -102,7 +102,8 @@ export default class SimpleLevel extends Phaser.Scene {
     this.player.light = this.lights.addLight(
       TILE_SIZE + TILE_SIZE_HALF,
       TILE_SIZE + (TILE_SIZE + 2),
-      LIGHT_DIAMETER).setColor(NORMAL_LIGHT_COLOR).setIntensity(1.0)
+      LIGHT_DIAMETER).setIntensity(1.0)
+    this.domains.lights.setColor(this.player.light, NORMAL_LIGHT_COLOR)
     this.lights.enable().setAmbientColor(AMBIENT_COLOR)
 
     this.anims.createFromAseprite(ENEMY_TEXTURE)
@@ -150,7 +151,7 @@ export default class SimpleLevel extends Phaser.Scene {
       if (presses.oneRingMode !== this.oneRingMode) {
         if (presses.oneRingMode) {
           this.isORMon = true
-          this.player.light.setColor(ORM_MODE_LIGHT_COLOR)
+          this.domains.lights.setColor(this.player.light, ORM_MODE_LIGHT_COLOR)
           this.goal.resetPipeline()
           for (const enemy of this.enemies) {
             enemy.resetPipeline()
@@ -161,7 +162,7 @@ export default class SimpleLevel extends Phaser.Scene {
           }
         } else {
           this.isORMon = false
-          this.player.light.setColor(NORMAL_LIGHT_COLOR)
+          this.domains.lights.setColor(this.player.light, NORMAL_LIGHT_COLOR)
           this.goal.setPipeline(PIPELINE)
           for (const enemy of this.enemies) {
             enemy.setPipeline(PIPELINE)
@@ -213,9 +214,10 @@ export default class SimpleLevel extends Phaser.Scene {
       TILE_SIZE * x + TILE_SIZE_HALF,
       TILE_SIZE * y + TILE_SIZE_HALF,
       LIGHT_DIAMETER)
-      .setColor(ORM_MODE_LIGHT_COLOR)
       .setIntensity(1.0)
       .setVisible(false)
+
+    this.domains.lights.setColor(enemy.light, ORM_MODE_LIGHT_COLOR)
 
     enemy.lastMoveTime = 0
     for (const otherEnemy of scene.enemies) {

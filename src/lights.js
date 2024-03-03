@@ -7,6 +7,10 @@ class Lights {
   flicker (light, diameter, maxVariation) {
     light.diameter = diameter + Math.floor(this._getRandomNumber() * maxVariation)
   }
+
+  setColor (light, color) {
+    light.setColor(color)
+  }
 }
 
 module.exports = Lights

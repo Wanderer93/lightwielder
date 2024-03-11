@@ -49,6 +49,7 @@ const directions = {
 const POST_UPDATE = 'postupdate'
 const ONE_RING_MODE_ON_EVENT = 'ormmodeon'
 const ONE_RING_MODE_OFF_EVENT = 'ormmodeoff'
+const WORLD_STEP = 'worldstep'
 
 export default class SimpleLevel extends Phaser.Scene {
   constructor () {
@@ -112,6 +113,7 @@ export default class SimpleLevel extends Phaser.Scene {
     this.events.on(POST_UPDATE, () => this.domains.lights.flicker(this.player.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE))
     this.events.on(ONE_RING_MODE_ON_EVENT, () => this.domains.lights.setColor(this.player.light, ORM_MODE_LIGHT_COLOR))
     this.events.on(ONE_RING_MODE_OFF_EVENT, () => this.domains.lights.setColor(this.player.light, NORMAL_LIGHT_COLOR))
+    this.physics.world.on(WORLD_STEP, () => this._movementSynchronize(this.player.body, this.player.light))
 
     this.anims.createFromAseprite(ENEMY_TEXTURE)
     this.enemies = []
@@ -197,8 +199,6 @@ export default class SimpleLevel extends Phaser.Scene {
         this.lastMoveTime = time
       }
     }
-    this.player.light.x = this.player.body.x + TILE_SIZE_HALF
-    this.player.light.y = this.player.body.y + TILE_SIZE_HALF
     for (const enemy of this.enemies) {
       this._updateEnemy(enemy, time)
     }
@@ -225,6 +225,7 @@ export default class SimpleLevel extends Phaser.Scene {
 
     this.domains.lights.setColor(enemy.light, ORM_MODE_LIGHT_COLOR)
     this.events.on(POST_UPDATE, () => this.domains.lights.flicker(enemy.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE))
+    this.physics.world.on(WORLD_STEP, () => this._movementSynchronize(enemy.body, enemy.light))
 
     enemy.lastMoveTime = 0
     for (const otherEnemy of scene.enemies) {
@@ -332,10 +333,11 @@ export default class SimpleLevel extends Phaser.Scene {
         }
       }
     }
+  }
 
-    enemy.light.x = enemy.body.x + TILE_SIZE_HALF
-    enemy.light.y = enemy.body.y + TILE_SIZE_HALF
-    this.domains.lights.flicker(enemy.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE)
+  _movementSynchronize (source, target) {
+    target.x = source.x + TILE_SIZE_HALF
+    target.y = source.y + TILE_SIZE_HALF
   }
 
   _goalOverlap (player, goal) {

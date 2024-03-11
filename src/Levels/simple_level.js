@@ -81,7 +81,6 @@ export default class SimpleLevel extends Phaser.Scene {
     const map = this.make.tilemap({ key: 'map', tileWidth: TILE_SIZE, tileHeight: TILE_SIZE })
     const tileset = map.addTilesetImage('floating-tileset', 'tiles')
     this.isPlayerDying = false
-    this.isORMon = false
     this.layerGround = map.createLayer('ground', tileset, 0, 0).setPipeline(PIPELINE)
     this.layerWater = map.createLayer('water', tileset, 0, 0).setPipeline(PIPELINE)
     this.layerHill = map.createLayer('hill', tileset, 0, 0).setPipeline(PIPELINE)
@@ -160,7 +159,6 @@ export default class SimpleLevel extends Phaser.Scene {
       }
       if (presses.oneRingMode !== this.oneRingMode) {
         if (presses.oneRingMode) {
-          this.isORMon = true
           this.events.emit(ONE_RING_MODE_ON_EVENT)
           this.goal.resetPipeline()
           for (const enemy of this.enemies) {
@@ -171,7 +169,6 @@ export default class SimpleLevel extends Phaser.Scene {
             this.anims.createFromAseprite(ENEMY_ORM_TEXTURE)
           }
         } else {
-          this.isORMon = false
           this.events.emit(ONE_RING_MODE_OFF_EVENT)
           this.goal.setPipeline(PIPELINE)
           for (const enemy of this.enemies) {
@@ -179,7 +176,8 @@ export default class SimpleLevel extends Phaser.Scene {
             enemy.postFX.clear()
             enemy.light.setVisible(false)
           }
-        } this.oneRingMode = presses.oneRingMode
+        }
+        this.oneRingMode = presses.oneRingMode
       }
       if (anyPressed) {
         if (this.isPlayerDying) {
@@ -264,7 +262,7 @@ export default class SimpleLevel extends Phaser.Scene {
       // clash with a different tile.
       // Why yes, this bit was a complete arse, why do you ask?
       if (moving) {
-        (this.isORMon ? enemy.play('run-orm', true) : enemy.play('run', true))
+        (this.oneRingMode ? enemy.play('run-orm', true) : enemy.play('run', true))
 
         const numX = enemy.body.x + TILE_SIZE_HALF
         const nearestX = numX - (numX % TILE_SIZE)
@@ -313,7 +311,7 @@ export default class SimpleLevel extends Phaser.Scene {
       }
 
       if (!moving) {
-        (this.isORMon ? enemy.play('run-orm', false) : enemy.play('run', false))
+        (this.oneRingMode ? enemy.play('run-orm', false) : enemy.play('run', false))
         switch (enemy.direction) {
           case directions.LEFT:
             enemy.direction = directions.RIGHT

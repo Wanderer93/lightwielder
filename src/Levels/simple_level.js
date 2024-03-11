@@ -2,6 +2,7 @@ import Phaser from 'phaser/dist/phaser.min.js'
 
 import Lights from '../lights.js'
 import Controls from '../controls.js'
+import Movement from '../movement.js'
 
 import aTile from 'Assets/textures/tiles.png'
 import Map from 'Assets/textures/test-small.json'
@@ -113,7 +114,7 @@ export default class SimpleLevel extends Phaser.Scene {
     this.events.on(POST_UPDATE, () => this.domains.lights.flicker(this.player.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE))
     this.events.on(ONE_RING_MODE_ON_EVENT, () => this.domains.lights.setColor(this.player.light, ORM_MODE_LIGHT_COLOR))
     this.events.on(ONE_RING_MODE_OFF_EVENT, () => this.domains.lights.setColor(this.player.light, NORMAL_LIGHT_COLOR))
-    this.physics.world.on(WORLD_STEP, () => this._movementSynchronize(this.player.body, this.player.light))
+    this.physics.world.on(WORLD_STEP, () => Movement.synchronize(this.player.body, this.player.light, TILE_SIZE_HALF))
 
     this.anims.createFromAseprite(ENEMY_TEXTURE)
     this.enemies = []
@@ -225,7 +226,7 @@ export default class SimpleLevel extends Phaser.Scene {
 
     this.domains.lights.setColor(enemy.light, ORM_MODE_LIGHT_COLOR)
     this.events.on(POST_UPDATE, () => this.domains.lights.flicker(enemy.light, LIGHT_DIAMETER, LIGHT_VARIATION_MAX_SIZE))
-    this.physics.world.on(WORLD_STEP, () => this._movementSynchronize(enemy.body, enemy.light))
+    this.physics.world.on(WORLD_STEP, () => Movement.synchronize(enemy.body, enemy.light, TILE_SIZE_HALF))
 
     enemy.lastMoveTime = 0
     for (const otherEnemy of scene.enemies) {
@@ -333,11 +334,6 @@ export default class SimpleLevel extends Phaser.Scene {
         }
       }
     }
-  }
-
-  _movementSynchronize (source, target) {
-    target.x = source.x + TILE_SIZE_HALF
-    target.y = source.y + TILE_SIZE_HALF
   }
 
   _goalOverlap (player, goal) {
